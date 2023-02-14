@@ -1,0 +1,51 @@
+{
+  "update": {},
+  "fields": {
+    "summary": "SummaryVar",
+    "issuetype": {
+      "id": "TEAM_ID"
+    },
+    "project": {
+      "key": "ORG_ID"
+    },
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "text": "As a <user-role>, I <want/need/can/etc> <goal> so that <reason>.\n",
+              "type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    "priority": {
+      "id": "3"
+    },
+    "CF_TEAM": "TEAM_ID",
+    "CF_EPIC": "EPIC_ID",
+    "CF_SIZE": {
+      "value": "3"
+    },
+    "labels": [],
+    "CF_AC": {
+      "version": 1,
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "* Criteria 1\n \n* Criteria 2\n \n* Criteria 3"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

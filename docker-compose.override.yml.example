@@ -1,0 +1,21 @@
+version: "3"
+services:
+  app:
+    volumes:
+      - ./app:/app:delegated
+      - root_app:/root # for bash history etc
+      - bundle_app:/usr/local/bundle
+    environment:
+      - BUNDLE_PATH=/usr/local/bundle
+      - GEM_HOME=/usr/local/bundle
+    command:
+      - ./docker-start.override
+    networks:
+      development:
+    tty: true
+    stdin_open: true
+volumes:
+  bundle_app:
+  root_app:
+networks:
+  development:

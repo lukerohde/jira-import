@@ -1,0 +1,7 @@
+.bundle
+docker-compose.override.yml
+.env
+*.xlsx
+.byebug_history
+.DS_store
+tmp

@@ -1,0 +1,20 @@
+#!/bin/sh
+
+echo "Configuring nokogiri"
+bundle config build.nokogiri --use-system-libraries
+
+echo "Bundling gems"
+bundle check || bundle install --jobs 4 --retry 3
+
+echo Expecting you to run 
+echo \# docker-compose up www \&\& docker-compose exec /bin/bash
+echo \# bundle exec ruby start.rb
+echo \# OR
+echo \# bundle exec rails s -p 3000 -b '0.0.0.0'
+
+# THIS KEEPS THE CONTAINER RUNNING
+# AND GRACEFULLY KILLS IT TOO
+trap "echo $0 gracefully shutting down... && pkill ruby" TERM INT
+tail -f /dev/null &
+wait 
+EXIT_STATUS=$?

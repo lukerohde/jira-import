@@ -1,0 +1,24 @@
+version: "3"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./app.dockerfile
+    user: gitlab
+    restart: "no"
+    environment:
+      - JIRA_USER
+      - JIRA_API_TOKEN
+      - JIRA_API_URL
+      - DEFAULT_TEAM_ID
+      - DEFAULT_SIZE
+      - STORY_TYPE_ID
+      - ORG_ID
+      - CF_TEAM
+      - CF_EPIC
+      - CF_SIZE
+      - CF_AC
+      - TEMPLATE_FILE
+    volumes:
+      - ./app:/app
+    command: ./docker-start
