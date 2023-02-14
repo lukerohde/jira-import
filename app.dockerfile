@@ -4,3 +4,5 @@ RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs le
 
 WORKDIR /app
 COPY ./app /app
+COPY ./ZscalerRootCertificate-2048-SHA256.crt /usr/local/share/ca-certificates/zscaler-root-ca.pem
+    

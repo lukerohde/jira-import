@@ -14,7 +14,8 @@ private
 		xls = Roo::Spreadsheet.open(file)
 		results = []
 
-		xls.each(summary: 'Summary', Reporter: "Reporter", description: "Description", acceptance: "Acceptance Criteria", epic_link: "Epic Link", labels: "Labels") do |row|
+		#xls.each(summary: 'Summary', Reporter: "Reporter", description: "Description", acceptance: "Acceptance Criteria", epic_link: "Epic Link", labels: "Labels") do |row|
+		xls.each(epic_link: 'epic_link', summary: 'summary', description: "description", acceptance: "acceptance", size: "size", team: "team", labels: "labels") do |row|
 			if valid_row?(row)
 				payload = merge_row(@template, row)
 				results << post_ticket(payload)
@@ -53,33 +54,20 @@ private
 		row[:summary] && row[:summary].downcase != "summary"
 	end
 
-	# def merge_row_v3(template,row)
-	# 	# There is a bug in the V3 api that prevents markdown being interpreted
-	# 	# https://jira.atlassian.com/browse/JRACLOUD-72071
-	# 	# Workaround is to use V2 api
-
-	# 	template['fields']['summary'] = row[:summary]
-	# 	template['fields']['description']['content'][0]['content'][0]['text'] = row[:description]
-	# 	template['fields'][ENV['CF_EPIC']]=row[:epic_link]
-	# 	template['fields'][ENV['CF_AC']]['content'][0]['content'][0]['text']=row[:acceptance]
-	# 	template['fields']["labels"]=row[:labels]&.split(',')
-
-	# 	template['fields'] = template['fields'].transform_keys { |k| k == "CF_EPIC" ? ENV['CF_EPIC'] : k }
-	# 	template['fields'] = template['fields'].transform_keys { |k| k == "CF_TEAM" ? ENV['CF_TEAM'] : k }
-	# 	template['fields'] = template['fields'].transform_keys { |k| k == "CF_AC" ? ENV['CF_AC'] : k }
-	# 	template['fields'] = template['fields'].transform_keys { |k| k == "CF_SIZE" ? ENV['CF_SIZE'] : k }
-		
-	# 	template
-	# end
-
 	def merge_row(template,row)
 		# There is a bug in the V3 api that prevents markdown being interpreted
 		# https://jira.atlassian.com/browse/JRACLOUD-72071
 		# Workaround is to use V2 api
 
+		binding.pry
+		template['fields'] = template['fields'].transform_keys { |k| k == "CF_EPIC" ? ENV['CF_EPIC'] : k }
+		template['fields'] = template['fields'].transform_keys { |k| k == "CF_TEAM" ? ENV['CF_TEAM'] : k }
+		template['fields'] = template['fields'].transform_keys { |k| k == "CF_SIZE" ? ENV['CF_SIZE'] : k }
+		template['fields'] = template['fields'].transform_keys { |k| k == "CF_AC" ? ENV['CF_AC'] : k }
+
 		template['fields']['summary'] = row[:summary]
 		template['fields']['issuetype']['id'] = ENV['STORY_TYPE_ID']
-		template['fields']['project']['key'] = ENV['MY_ORG']
+		template['fields']['project']['key'] = ENV['ORG_ID']
 		template['fields']['description'] = row[:description]
 		template['fields'][ENV['CF_TEAM']]=row[:team] || ENV['TEAM_ID']
     	template['fields'][ENV['CF_EPIC']]=row[:epic_link] || ENV['EPIC_ID']
@@ -87,12 +75,7 @@ private
 		template['fields'][ENV['CF_AC']]=row[:acceptance]
     	template['fields']["labels"]=row[:labels]&.split(', ')
 
-		template['fields'] = template['fields'].transform_keys { |k| k == "CF_EPIC" ? ENV['CF_EPIC'] : k }
-		template['fields'] = template['fields'].transform_keys { |k| k == "CF_TEAM" ? ENV['CF_TEAM'] : k }
-		template['fields'] = template['fields'].transform_keys { |k| k == "CF_SIZE" ? ENV['CF_SIZE'] : k }
-		template['fields'] = template['fields'].transform_keys { |k| k == "CF_AC" ? ENV['CF_AC'] : k }
-		
-		payload
+		template
 	end
 
 	def post_ticket(payload)

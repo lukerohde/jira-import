@@ -3,13 +3,13 @@
 This project takes an xlsx spreadsheet of stories and imports it into Jira using the V2 API.
 
 Import fields
-* Summary
-* Description
+* summary
+* description
 * labels (might not work with V2 api)
-* Acceptance Criteria
-* Size
-* Team
-* Epic Link (story ID like xx-xxx)
+* acceptance
+* size
+* team
+* epic_link (story ID like xx-xxx)
 
 You will need docker and docker-compose installed.
 
@@ -25,12 +25,15 @@ In jira navigate to
 * Prep downloaded file for re-import
   * Open downloaded HTML file with excel
   * Remove 3 header rows (not the table header), and keep the following columns
-  * Keep these columns
-    * Summary
-    * Description
-    * Labels
-    * Acceptance Criteria
-    * Epic Link (replace old epic name with the new epic's key xx-xxx)
+  * Rename these column headers, and delete the rest; 
+    * summary
+    * description
+    * labels (might not work with V2 api)
+    * acceptance
+    * size
+    * team
+    * epic_link (story ID like xx-xxx)
+    * (Alternatively you could update process_sheet() to map your columns)
 * Look over the epic and clean up
   * Remove the word done
   * Remove references to specific version and dates
