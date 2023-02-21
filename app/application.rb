@@ -5,23 +5,42 @@ class Application
 		@options = parse_options
 		@template = JSON.parse(File.read(ENV['TEMPLATE_FILE']))
 
-		@results = process_sheet(@options[:xls_file])
+		@tickets = load_sheet(@options[:xls_file])
+		binding.pry 
+		pp @tickets
+		@presult = post_tickets(@tickets, "#{@options[:xls_file]}.json")
 	end
+
+	def test()
+		binding.pry 
+
+		get_result = get_ticket("OP-11678")
+		
+		print 
+	end 
 
 private
 
-	def process_sheet(file)
+
+	def load_sheet(file)
 		xls = Roo::Spreadsheet.open(file)
 		results = []
 
 		#xls.each(summary: 'Summary', Reporter: "Reporter", description: "Description", acceptance: "Acceptance Criteria", epic_link: "Epic Link", labels: "Labels") do |row|
 		xls.each(epic_link: 'epic_link', summary: 'summary', description: "description", acceptance: "acceptance", size: "size", team: "team", labels: "labels") do |row|
 			if valid_row?(row)
-				payload = merge_row(@template, row)
-				results << post_ticket(payload)
+				results.append(merge_row(@template, row))
+			end 
+		end 
+		results
+	end
 
-				update_progress(file, results)
-			end
+	def post_tickets(tickets, result_file)
+		results = []
+
+		tickets.each do |payload|
+			results << post_ticket(payload)
+			pp results
 		end
 
 		results
@@ -30,7 +49,7 @@ private
 	def update_progress(file, results)
 		pp results.last
 		puts "\n\n"
-		File.write("#{file}.json", JSON.pretty_generate(results))
+		File.write(result_file, JSON.pretty_generate(results))
 	end
 
 	def parse_options
@@ -58,24 +77,24 @@ private
 		# There is a bug in the V3 api that prevents markdown being interpreted
 		# https://jira.atlassian.com/browse/JRACLOUD-72071
 		# Workaround is to use V2 api
+		result = template.clone()
 
-		binding.pry
-		template['fields'] = template['fields'].transform_keys { |k| k == "CF_EPIC" ? ENV['CF_EPIC'] : k }
-		template['fields'] = template['fields'].transform_keys { |k| k == "CF_TEAM" ? ENV['CF_TEAM'] : k }
-		template['fields'] = template['fields'].transform_keys { |k| k == "CF_SIZE" ? ENV['CF_SIZE'] : k }
-		template['fields'] = template['fields'].transform_keys { |k| k == "CF_AC" ? ENV['CF_AC'] : k }
+		result['fields'] = result['fields'].transform_keys { |k| k == "CF_EPIC" ? ENV['CF_EPIC'] : k }
+		result['fields'] = result['fields'].transform_keys { |k| k == "CF_TEAM" ? ENV['CF_TEAM'] : k }
+		result['fields'] = result['fields'].transform_keys { |k| k == "CF_SIZE" ? ENV['CF_SIZE'] : k }
+		result['fields'] = result['fields'].transform_keys { |k| k == "CF_AC" ? ENV['CF_AC'] : k }
 
-		template['fields']['summary'] = row[:summary]
-		template['fields']['issuetype']['id'] = ENV['STORY_TYPE_ID']
-		template['fields']['project']['key'] = ENV['ORG_ID']
-		template['fields']['description'] = row[:description]
-		template['fields'][ENV['CF_TEAM']]=row[:team] || ENV['TEAM_ID']
-    	template['fields'][ENV['CF_EPIC']]=row[:epic_link] || ENV['EPIC_ID']
-		template['fields'][ENV['CF_SIZE']]["value"]=row[:size] || ENV['SIZE']
-		template['fields'][ENV['CF_AC']]=row[:acceptance]
-    	template['fields']["labels"]=row[:labels]&.split(', ')
+		result['fields']['summary'] = row[:summary]
+		result['fields']['issuetype']['id'] = ENV['STORY_TYPE_ID']
+		result['fields']['project']['key'] = ENV['ORG_ID']
+		result['fields']['description'] = row[:description]
+		result['fields'][ENV['CF_TEAM']]=(row[:team] || ENV['DEFAULT_TEAM_ID']).to_s
+    	result['fields'][ENV['CF_EPIC']]=row[:epic_link] || ENV['EPIC_ID']
+		result['fields'][ENV['CF_SIZE']]=(row[:size] || ENV['DEFAULT_SIZE']).to_i
+		result['fields'][ENV['CF_AC']]=row[:acceptance]
+    	result['fields']["labels"]=row[:labels]&.split(', ')
 
-		template
+		result
 	end
 
 	def post_ticket(payload)
@@ -90,6 +109,21 @@ private
 		).execute do |response, request, result|
 			jira_result = JSON.parse(response.body) rescue {}
 			jira_result["summary"] = payload['fields']['summary']
+		end
+
+		jira_result
+	end
+
+	def get_ticket(id)
+		jira_result = {}
+		RestClient::Request.new(
+			:method => :get,
+			:url => ENV['JIRA_API_URL'] + "/#{id}",
+			:user => ENV['JIRA_USER'],
+			:password => ENV['JIRA_API_TOKEN'],
+			:headers => { :accept => :json, :content_type => :json }
+		).execute do |response, request, result|
+			jira_result = JSON.parse(response.body) rescue {}
 		end
 
 		jira_result

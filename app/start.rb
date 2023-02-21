@@ -7,3 +7,5 @@ Bundler.require(:default)
 
 require './application'
 app = Application.new
+
+#app.test()
