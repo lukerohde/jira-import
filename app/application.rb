@@ -6,7 +6,6 @@ class Application
 		@template = JSON.parse(File.read(ENV['TEMPLATE_FILE']))
 
 		@tickets = load_sheet(@options[:xls_file])
-		binding.pry 
 		pp @tickets
 		@presult = post_tickets(@tickets, "#{@options[:xls_file]}.json")
 	end
