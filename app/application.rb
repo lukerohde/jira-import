@@ -7,13 +7,14 @@ class Application
 
 		@tickets = load_sheet(@options[:xls_file])
 		pp @tickets
+
 		@presult = post_tickets(@tickets, "#{@options[:xls_file]}.json")
 	end
 
 	def test()
 		binding.pry 
 
-		get_result = get_ticket("OP-11678")
+		get_result = get_ticket("DATA-853")
 		
 		print 
 	end 

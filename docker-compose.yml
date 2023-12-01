@@ -18,6 +18,7 @@ services:
       - CF_SIZE
       - CF_AC
       - TEMPLATE_FILE
+      - SSL_CERT_FILE=/usr/local/share/ca-certificates/zscaler-root-ca.pem 
     volumes:
       - ./app:/app
     command: ./docker-start
